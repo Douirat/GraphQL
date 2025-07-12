@@ -3,19 +3,16 @@ import { logout_user } from "../controllers/auth.js";
 export function render_header(parentId = "main_container") {
     const container = document.getElementById(parentId);
 
-    const header = document.createElement("header");
-    header.className = "app-header";
+    const template = document.createElement("template");
+    template.innerHTML = `
+        <header class="app-header">
+            <h1>GraphQL</h1>
+            <button class="logout-button">Logout</button>
+        </header>
+    `.trim();
 
-    // Title
-    const title = document.createElement("h1");
-    title.textContent = "GraphQL";
-
-    // Logout button
-    const logoutBtn = document.createElement("button");
-    logoutBtn.textContent = "Logout";
-    logoutBtn.className = "logout-button";
+    const header = template.content.firstElementChild;
+    const logoutBtn = header.querySelector(".logout-button");
     logoutBtn.addEventListener("click", logout_user);
-
-    header.append(title, logoutBtn);
-    container.prepend(header); // Add at the top
+    container.prepend(header);
 }
