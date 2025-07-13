@@ -3,6 +3,7 @@ import { handle_login } from "../controllers/auth.js";
 export function render_login_form() {
     let container = document.getElementById("main_container");
     container.innerHTML = `
+    <header class="app-header"><h1>GraphQL</h1></header>
           <div class="login-wrapper">
             <div class="login-container">
                 <h2 class="login-title">Welcome Back</h2>
