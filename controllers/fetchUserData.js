@@ -112,5 +112,5 @@ export function fetchUserData() {
         localStorage.clear();
         render_login_form();
       });
-  }, 500); // Delay to avoid spam
+  }, 200); // Delay to avoid spam
 }
