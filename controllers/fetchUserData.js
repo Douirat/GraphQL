@@ -5,12 +5,7 @@ import { processUserData } from "./processUserData.js";
 function retryFetch(url, options, retries = 3, delay = 1000) {
   return fetch(url, options).catch((err) => {
     if (retries === 0) throw err;
-    return new Promise((resolve) =>
-      setTimeout(
-        () => resolve(retryFetch(url, options, retries - 1, delay)),
-        delay
-      )
-    );
+    return setTimeout(() => retryFetch(url, options, retries - 1, delay), delay);
   });
 }
 
