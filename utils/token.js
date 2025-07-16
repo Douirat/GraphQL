@@ -1,5 +1,5 @@
 import { clear_app_state } from "./state.js";
-import { render_login_form } from "../components/login.js"; // بدل navigateTo
+import { render_login_form } from "../components/login.js"; 
 
 export function get_JWT() {
   let token = localStorage.getItem("access_token");
