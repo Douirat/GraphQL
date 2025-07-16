@@ -16,9 +16,9 @@ export function handle_user_ratio(ratio) {
 
   // Choose color based on ratio
   const color =
-    audit_ratio < 0.5 ? "red" : audit_ratio < 0.75 ? "orange" : "green";
+    audit_ratio < 0.5 ? "red" : audit_ratio < 1.2 ? "orange" : "green";
   const stroke_color =
-    audit_ratio < 0.5 ? "white" : audit_ratio < 0.75 ? "green" : "white";
+    audit_ratio < 0.5 ? "white" : audit_ratio < 1.2 ? "green" : "white";
 
   // Foreground progress circle
   const progressCircle = document.createElementNS(
@@ -48,7 +48,7 @@ export function handle_user_ratio(ratio) {
   text.textContent =
     audit_ratio < 0.5
       ? "Do more audits!"
-      : audit_ratio < 0.75
+      : audit_ratio < 1.2
         ? "you can do better!"
         : "you are perfect";
   text.style.color = color;
@@ -59,8 +59,7 @@ export function handle_user_ratio(ratio) {
   ratio_container.appendChild(text);
 }
 
-// Handle given and taken ratios:
-// Handle given and taken XP visualization
+// Handle given and taken ratios with responsive fixes
 export function handle_given_taken_xps(ratio) {
   const container = document.getElementById("given_taken");
   const definition = document.getElementById("definition");
@@ -78,25 +77,15 @@ export function handle_given_taken_xps(ratio) {
   const down_percentage = ratio.totalDown / total_xp;
 
   const svgNS = "http://www.w3.org/2000/svg";
-  const fallbackWidth = 300; // Fallback if container has no width yet
-  const totalWidth = container.clientWidth || fallbackWidth;
 
-  const rectHeight = 10;
-  const gap = 5;
-  const svgHeight = rectHeight * 2 + gap;
-
-  const receivedWidth = up_percentage * totalWidth;
-  const givenWidth = down_percentage * totalWidth;
-
-  // define the chart:
+  // Create definition section (keeping your logic)
   let given = document.createElement("div");
   given.setAttribute("class", "give_take");
   let given_quad = document.createElement("div");
   given_quad.setAttribute("id", "given_quad");
   let given_text = document.createElement("small");
   given_text.setAttribute("id", "given_text");
-  given_text.textContent = `taken ${Math.round((ratio.totalDown / 1000000) * 100) / 100
-    } mb`;
+  given_text.textContent = `taken ${Math.round((ratio.totalDown / 1000000) * 100) / 100} mb`;
 
   given.append(given_quad, given_text);
 
@@ -106,32 +95,99 @@ export function handle_given_taken_xps(ratio) {
   taken_quad.setAttribute("id", "taken_quad");
   let taken_text = document.createElement("small");
   taken_text.setAttribute("id", "taken_text");
-  taken_text.textContent = `Received ${Math.round((ratio.totalUp / 1000000) * 100) / 100
-    } mb`;
+  taken_text.textContent = `Received ${Math.round((ratio.totalUp / 1000000) * 100) / 100} mb`;
 
   taken.append(taken_quad, taken_text);
 
+  definition.innerHTML = ""; // Clear previous content
   definition.append(given, taken);
 
-  const svg = document.createElementNS(svgNS, "svg");
-  svg.setAttribute("width", totalWidth);
-  svg.setAttribute("height", svgHeight);
+  // Function to create the SVG bars (responsive)
+  const createBars = () => {
+    // Better responsive width calculation
+    const containerRect = container.getBoundingClientRect();
+    const containerWidth = containerRect.width;
+    const fallbackWidth = Math.min(300, window.innerWidth - 80);
+    const totalWidth = containerWidth > 0 ? containerWidth : fallbackWidth;
 
-  const receivedRect = document.createElementNS(svgNS, "rect");
-  receivedRect.setAttribute("x", 0);
-  receivedRect.setAttribute("y", 0);
-  receivedRect.setAttribute("width", receivedWidth);
-  receivedRect.setAttribute("height", rectHeight);
-  receivedRect.setAttribute("fill", "green");
+    const rectHeight = 10;
+    const gap = 5;
+    const svgHeight = rectHeight * 2 + gap;
 
-  const givenRect = document.createElementNS(svgNS, "rect");
-  givenRect.setAttribute("x", 0);
-  givenRect.setAttribute("y", rectHeight + gap);
-  givenRect.setAttribute("width", givenWidth);
-  givenRect.setAttribute("height", rectHeight);
-  givenRect.setAttribute("fill", "red");
+    const receivedWidth = Math.max(up_percentage * totalWidth, 2); // Minimum 2px width
+    const givenWidth = Math.max(down_percentage * totalWidth, 2); // Minimum 2px width
 
-  svg.appendChild(receivedRect);
-  svg.appendChild(givenRect);
-  container.appendChild(svg);
+    // Remove existing SVG if any
+    const existingSvg = container.querySelector('svg');
+    if (existingSvg) existingSvg.remove();
+
+    // Create responsive SVG
+    const svg = document.createElementNS(svgNS, "svg");
+    svg.setAttribute("width", "100%");
+    svg.setAttribute("height", svgHeight);
+    svg.setAttribute("viewBox", `0 0 ${totalWidth} ${svgHeight}`);
+    svg.setAttribute("preserveAspectRatio", "none");
+    svg.style.display = "block";
+    svg.style.maxWidth = "100%";
+
+    // Background bars for better visual feedback
+    const receivedBg = document.createElementNS(svgNS, "rect");
+    receivedBg.setAttribute("x", 0);
+    receivedBg.setAttribute("y", 0);
+    receivedBg.setAttribute("width", totalWidth);
+    receivedBg.setAttribute("height", rectHeight);
+    receivedBg.setAttribute("fill", "#e2e8f0");
+    receivedBg.setAttribute("rx", 2);
+
+    const givenBg = document.createElementNS(svgNS, "rect");
+    givenBg.setAttribute("x", 0);
+    givenBg.setAttribute("y", rectHeight + gap);
+    givenBg.setAttribute("width", totalWidth);
+    givenBg.setAttribute("height", rectHeight);
+    givenBg.setAttribute("fill", "#e2e8f0");
+    givenBg.setAttribute("rx", 2);
+
+    // Progress bars (keeping your original colors)
+    const receivedRect = document.createElementNS(svgNS, "rect");
+    receivedRect.setAttribute("x", 0);
+    receivedRect.setAttribute("y", 0);
+    receivedRect.setAttribute("width", receivedWidth);
+    receivedRect.setAttribute("height", rectHeight);
+    receivedRect.setAttribute("fill", "green");
+    receivedRect.setAttribute("rx", 2);
+
+    const givenRect = document.createElementNS(svgNS, "rect");
+    givenRect.setAttribute("x", 0);
+    givenRect.setAttribute("y", rectHeight + gap);
+    givenRect.setAttribute("width", givenWidth);
+    givenRect.setAttribute("height", rectHeight);
+    givenRect.setAttribute("fill", "red");
+    givenRect.setAttribute("rx", 2);
+
+    // Append elements
+    svg.appendChild(receivedBg);
+    svg.appendChild(givenBg);
+    svg.appendChild(receivedRect);
+    svg.appendChild(givenRect);
+    
+    container.appendChild(svg);
+  };
+
+  // Create initial bars
+  createBars();
+
+  // Handle window resize with debouncing
+  if (window.ratioResizeHandler) {
+    window.removeEventListener("resize", window.ratioResizeHandler);
+  }
+  
+  let resizeTimeout;
+  window.ratioResizeHandler = () => {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => {
+      createBars();
+    }, 150);
+  };
+  
+  window.addEventListener("resize", window.ratioResizeHandler);
 }
